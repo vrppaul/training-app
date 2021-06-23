@@ -1,0 +1,22 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Exercise {
+  id: ID!
+  name: String!
+  description: String
+}
+
+input NewExercise {
+  name: String!
+  description: String
+}
+
+type Query {
+  exercises: [Exercise!]!
+}
+
+type Mutation {
+  createExercise(input: NewExercise!): Exercise!
+}
