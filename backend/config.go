@@ -3,16 +3,25 @@ package main
 import "os"
 
 type Config struct {
-	Port        string
-	MongoUri    string
-	MongoDbName string
+	Host          string
+	Port          string
+	MongoUri      string
+	MongoDbName   string
+	MongoUsername string
+	MongoPassword string
 }
 
+const defaultHost = "0.0.0.0"
 const defaultPort = "8080"
 const defaultMongoDbUri = "mongodb://localhost"
 const defaultMongoDbName = "training"
 
 func GetConfig() *Config {
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = defaultHost
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -28,9 +37,15 @@ func GetConfig() *Config {
 		mongoDbName = defaultMongoDbName
 	}
 
+	mongoUsername := os.Getenv("MONGO_USERNAME")
+	mongoPassword := os.Getenv("MONGO_PASSWORD")
+
 	return &Config{
-		Port:        port,
-		MongoUri:    mongoUri,
-		MongoDbName: mongoDbName,
+		Host:          host,
+		Port:          port,
+		MongoUri:      mongoUri,
+		MongoDbName:   mongoDbName,
+		MongoUsername: mongoUsername,
+		MongoPassword: mongoPassword,
 	}
 }

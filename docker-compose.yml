@@ -1,0 +1,24 @@
+version: "3.8"
+
+services: 
+    mongo:
+        image: mongo
+        restart: always
+        # environment:
+            # MONGO_INITDB_ROOT_USERNAME: root
+            # MONGO_INITDB_ROOT_PASSWORD: exercises-dev
+        # ports: "27017:27017"
+
+    backend:
+        build: ./backend
+        ports:
+            - "8080:8080"
+        depends_on: 
+            - mongo
+        environment: 
+            HOST: "0.0.0.0"
+            PORT: 8080
+            MONGO_URI: mongodb://mongo:27017
+            MONGO_DB_NAME: training
+            # MONGO_USERNAME: root
+            # MONGO_PASSWORD: exercises-dev

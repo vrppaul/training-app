@@ -15,7 +15,7 @@ import (
 func main() {
 	config := GetConfig()
 
-	client, disconnect := db.GetClient(config.MongoUri)
+	client, disconnect := db.GetClient(config.MongoUri, config.MongoUsername, config.MongoPassword)
 	defer disconnect()
 	database := crud.GetCRUDDB(config.MongoDbName, client)
 
@@ -24,6 +24,7 @@ func main() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", config.Port)
-	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
+	uri := config.Host + ":" + config.Port
+	log.Printf("connect to %s for GraphQL playground", uri)
+	log.Fatal(http.ListenAndServe(uri, nil))
 }
