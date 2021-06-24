@@ -3,7 +3,7 @@
 package model
 
 type Exercise struct {
-	ID          string  `json:"id"`
+	ID          string  `json:"_id"`
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
 }

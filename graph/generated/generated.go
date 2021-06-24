@@ -54,6 +54,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Exercise  func(childComplexity int, id string) int
 		Exercises func(childComplexity int) int
 	}
 }
@@ -62,6 +63,7 @@ type MutationResolver interface {
 	CreateExercise(ctx context.Context, input model.NewExercise) (*model.Exercise, error)
 }
 type QueryResolver interface {
+	Exercise(ctx context.Context, id string) (*model.Exercise, error)
 	Exercises(ctx context.Context) ([]*model.Exercise, error)
 }
 
@@ -87,7 +89,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Exercise.Description(childComplexity), true
 
-	case "Exercise.id":
+	case "Exercise._id":
 		if e.complexity.Exercise.ID == nil {
 			break
 		}
@@ -112,6 +114,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateExercise(childComplexity, args["input"].(model.NewExercise)), true
+
+	case "Query.exercise":
+		if e.complexity.Query.Exercise == nil {
+			break
+		}
+
+		args, err := ec.field_Query_exercise_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Exercise(childComplexity, args["_id"].(string)), true
 
 	case "Query.exercises":
 		if e.complexity.Query.Exercises == nil {
@@ -189,7 +203,7 @@ var sources = []*ast.Source{
 # https://gqlgen.com/getting-started/
 
 type Exercise {
-  id: ID!
+  _id: String!
   name: String!
   description: String
 }
@@ -200,6 +214,7 @@ input NewExercise {
 }
 
 type Query {
+  exercise(_id: String!): Exercise!
   exercises: [Exercise!]!
 }
 
@@ -243,6 +258,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_exercise_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["_id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("_id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["_id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -281,7 +311,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Exercise_id(ctx context.Context, field graphql.CollectedField, obj *model.Exercise) (ret graphql.Marshaler) {
+func (ec *executionContext) _Exercise__id(ctx context.Context, field graphql.CollectedField, obj *model.Exercise) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -313,7 +343,7 @@ func (ec *executionContext) _Exercise_id(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Exercise_name(ctx context.Context, field graphql.CollectedField, obj *model.Exercise) (ret graphql.Marshaler) {
@@ -409,6 +439,48 @@ func (ec *executionContext) _Mutation_createExercise(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateExercise(rctx, args["input"].(model.NewExercise))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Exercise)
+	fc.Result = res
+	return ec.marshalNExercise2ᚖgithubᚗcomᚋvrppaulᚋtrainingᚑappᚋgraphᚋmodelᚐExercise(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_exercise(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_exercise_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Exercise(rctx, args["_id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1665,8 +1737,8 @@ func (ec *executionContext) _Exercise(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Exercise")
-		case "id":
-			out.Values[i] = ec._Exercise_id(ctx, field, obj)
+		case "_id":
+			out.Values[i] = ec._Exercise__id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1734,6 +1806,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "exercise":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_exercise(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "exercises":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -2072,21 +2158,6 @@ func (ec *executionContext) marshalNExercise2ᚖgithubᚗcomᚋvrppaulᚋtrainin
 		return graphql.Null
 	}
 	return ec._Exercise(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNNewExercise2githubᚗcomᚋvrppaulᚋtrainingᚑappᚋgraphᚋmodelᚐNewExercise(ctx context.Context, v interface{}) (model.NewExercise, error) {

@@ -15,16 +15,12 @@ func (r *mutationResolver) CreateExercise(ctx context.Context, input model.NewEx
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Exercises(ctx context.Context) ([]*model.Exercise, error) {
-	var exercises []*model.Exercise
-	description := "Description of a dummy exercise"
-	dummyExercise := model.Exercise{
-		Name:        "Some dummy exercise",
-		Description: &description,
-	}
-	exercises = append(exercises, &dummyExercise)
-	return exercises, nil
+func (r *queryResolver) Exercise(ctx context.Context, id string) (*model.Exercise, error) {
+	panic(fmt.Errorf("not implemented"))
+}
 
+func (r *queryResolver) Exercises(ctx context.Context) ([]*model.Exercise, error) {
+	return r.CRUDDB.GetExercises()
 }
 
 // Mutation returns generated.MutationResolver implementation.
