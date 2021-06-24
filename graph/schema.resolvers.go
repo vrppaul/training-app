@@ -5,18 +5,17 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/vrppaul/training-app/graph/generated"
 	"github.com/vrppaul/training-app/graph/model"
 )
 
 func (r *mutationResolver) CreateExercise(ctx context.Context, input model.NewExercise) (*model.Exercise, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.CRUDDB.InsertExercise(&input)
 }
 
 func (r *queryResolver) Exercise(ctx context.Context, id string) (*model.Exercise, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.CRUDDB.GetExerciseById(id)
 }
 
 func (r *queryResolver) Exercises(ctx context.Context) ([]*model.Exercise, error) {

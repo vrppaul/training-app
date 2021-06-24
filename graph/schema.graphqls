@@ -3,7 +3,7 @@
 # https://gqlgen.com/getting-started/
 
 type Exercise {
-  _id: String!
+  _id: ID!
   name: String!
   description: String
 }

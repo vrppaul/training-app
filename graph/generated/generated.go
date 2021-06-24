@@ -203,7 +203,7 @@ var sources = []*ast.Source{
 # https://gqlgen.com/getting-started/
 
 type Exercise {
-  _id: String!
+  _id: ID!
   name: String!
   description: String
 }
@@ -343,7 +343,7 @@ func (ec *executionContext) _Exercise__id(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Exercise_name(ctx context.Context, field graphql.CollectedField, obj *model.Exercise) (ret graphql.Marshaler) {
@@ -2158,6 +2158,21 @@ func (ec *executionContext) marshalNExercise2ᚖgithubᚗcomᚋvrppaulᚋtrainin
 		return graphql.Null
 	}
 	return ec._Exercise(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNNewExercise2githubᚗcomᚋvrppaulᚋtrainingᚑappᚋgraphᚋmodelᚐNewExercise(ctx context.Context, v interface{}) (model.NewExercise, error) {
