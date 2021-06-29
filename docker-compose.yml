@@ -1,24 +1,77 @@
 version: "3.8"
 
-services: 
-    mongo:
-        image: mongo
-        restart: always
-        # environment:
-            # MONGO_INITDB_ROOT_USERNAME: root
-            # MONGO_INITDB_ROOT_PASSWORD: exercises-dev
-        # ports: "27017:27017"
+networks:
+    public:
+        external: true
+    db-internal:
+        external: false
+
+services:
+    reverse-proxy:
+        image: traefik:v2.4
+        command:
+            - "--log.level=DEBUG"
+            - "--api"
+            - "--api.dashboard"
+            - "--api.insecure"
+            - "--providers.docker"
+            - "--providers.docker.network=public"
+            - "--entrypoints.web.address=:80"
+        # labels:
+        #     - "traefik.enable=true"
+        #     - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+        #     - "traefik.http.routers.http-catchall.entrypoints=web"
+        networks:
+            - public
+        ports:
+            - "80:80"
+            - "8080:8080"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
+    frontend:
+        build: 
+            context: ./frontend
+            args:
+                REACT_APP_SERVER_URI: "http://0.0.0.0:8000"
+        depends_on:
+            - backend
+        environment:
+            NODE_ENV: production
+        labels:
+            - "traefik.enable=true"
+            - "traefik.docker.network=public"
+            - "traefik.http.routers.frontend.entrypoints=web"
+            - "traefik.http.routers.frontend.rule=Host(`localhost`, `127.0.0.1`)"
+            - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+        networks: 
+            - public
 
     backend:
         build: ./backend
-        ports:
-            - "8080:8080"
         depends_on: 
             - mongo
         environment: 
             HOST: "0.0.0.0"
-            PORT: 8080
-            MONGO_URI: mongodb://mongo:27017
+            PORT: 8000
+            MONGO_HOST: "mongo"
+            MONGO_PORT: "27017"
             MONGO_DB_NAME: training
-            # MONGO_USERNAME: root
-            # MONGO_PASSWORD: exercises-dev
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.backend.rule=Host(`localhost`, `127.0.0.1`) && PathPrefix(`/api`)"
+            - "traefik.http.middlewares.backend.stripprefix.prefixes=/api"
+            - "traefik.http.middlewares.backend.stripprefix.forceSlash=false"
+            - "traefik.http.services.api.loadbalancer.server.port=8000"
+        networks: 
+            - db-internal
+            - public
+
+    mongo:
+        image: mongo
+        labels:
+            - traefik.enable=false
+        networks: 
+            - db-internal
+        restart: always
+        

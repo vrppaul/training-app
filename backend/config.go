@@ -5,7 +5,7 @@ import "os"
 type Config struct {
 	Host          string
 	Port          string
-	MongoUri      string
+	MongoDbUri    string
 	MongoDbName   string
 	MongoUsername string
 	MongoPassword string
@@ -13,7 +13,8 @@ type Config struct {
 
 const defaultHost = "0.0.0.0"
 const defaultPort = "8080"
-const defaultMongoDbUri = "mongodb://localhost"
+const defaultMongoDbHost = "localhost"
+const defaultMongoDbPort = "27017"
 const defaultMongoDbName = "training"
 
 func GetConfig() *Config {
@@ -27,10 +28,15 @@ func GetConfig() *Config {
 		port = defaultPort
 	}
 
-	mongoUri := os.Getenv("MONGO_URI")
-	if mongoUri == "" {
-		mongoUri = defaultMongoDbUri
+	mongoDbHost := os.Getenv("MONGO_HOST")
+	mongoDbPort := os.Getenv("MONGO_PORT")
+	if mongoDbHost == "" {
+		mongoDbHost = defaultMongoDbHost
 	}
+	if mongoDbPort == "" {
+		mongoDbPort = defaultMongoDbPort
+	}
+	mongoDbUri := "mongodb://" + mongoDbHost + mongoDbPort
 
 	mongoDbName := os.Getenv("MONGO_DB_NAME")
 	if mongoDbName == "" {
@@ -43,7 +49,7 @@ func GetConfig() *Config {
 	return &Config{
 		Host:          host,
 		Port:          port,
-		MongoUri:      mongoUri,
+		MongoDbUri:    mongoDbUri,
 		MongoDbName:   mongoDbName,
 		MongoUsername: mongoUsername,
 		MongoPassword: mongoPassword,

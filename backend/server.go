@@ -15,14 +15,14 @@ import (
 func main() {
 	config := GetConfig()
 
-	client, disconnect := db.GetClient(config.MongoUri, config.MongoUsername, config.MongoPassword)
+	client, disconnect := db.GetClient(config.MongoDbUri, config.MongoUsername, config.MongoPassword)
 	defer disconnect()
 	database := crud.GetCRUDDB(config.MongoDbName, client)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{CRUDDB: database}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/playground", playground.Handler("GraphQL playground", "/"))
+	http.Handle("/", srv)
 
 	uri := config.Host + ":" + config.Port
 	log.Printf("connect to %s for GraphQL playground", uri)
