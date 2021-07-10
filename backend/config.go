@@ -36,7 +36,7 @@ func GetConfig() *Config {
 	if mongoDbPort == "" {
 		mongoDbPort = defaultMongoDbPort
 	}
-	mongoDbUri := "mongodb://" + mongoDbHost + mongoDbPort
+	mongoDbUri := "mongodb://" + mongoDbHost + ":" + mongoDbPort
 
 	mongoDbName := os.Getenv("MONGO_DB_NAME")
 	if mongoDbName == "" {

@@ -1,0 +1,16 @@
+FROM node:slim
+
+WORKDIR /training
+
+COPY package*.json ./
+COPY yarn.lock ./
+RUN yarn install
+
+COPY tsconfig.json .
+COPY src/ ./src
+COPY public/ ./public
+
+ARG REACT_APP_SERVER_URI
+ENV REACT_APP_SERVER_URI=$REACT_APP_SERVER_URI
+
+CMD [ "yarn", "start" ]

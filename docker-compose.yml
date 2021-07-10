@@ -17,10 +17,6 @@ services:
             - "--providers.docker"
             - "--providers.docker.network=public"
             - "--entrypoints.web.address=:80"
-        # labels:
-        #     - "traefik.enable=true"
-        #     - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-        #     - "traefik.http.routers.http-catchall.entrypoints=web"
         networks:
             - public
         ports:
@@ -32,8 +28,9 @@ services:
     frontend:
         build: 
             context: ./frontend
+            dockerfile: Dockerfile.dev
             args:
-                REACT_APP_SERVER_URI: "http://0.0.0.0:8000"
+                REACT_APP_SERVER_URI: "http://localhost/api"
         depends_on:
             - backend
         environment:
@@ -46,6 +43,8 @@ services:
             - "traefik.http.services.frontend.loadbalancer.server.port=3000"
         networks: 
             - public
+        volumes: 
+            - ./frontend/src:/training/src
 
     backend:
         build: ./backend
@@ -60,8 +59,6 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.backend.rule=Host(`localhost`, `127.0.0.1`) && PathPrefix(`/api`)"
-            - "traefik.http.middlewares.backend.stripprefix.prefixes=/api"
-            - "traefik.http.middlewares.backend.stripprefix.forceSlash=false"
             - "traefik.http.services.api.loadbalancer.server.port=8000"
         networks: 
             - db-internal
@@ -74,4 +71,3 @@ services:
         networks: 
             - db-internal
         restart: always
-        
