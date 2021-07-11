@@ -22,6 +22,14 @@ export const GET_EXERCISES = gql`
   }
 `;
 
+export const GET_EXERCISE_FRAGMENT = gql`
+  fragment NewExercise on Exercise {
+    _id
+    name
+    description
+  }
+`;
+
 export const CREATE_EXERCISE = gql`
   mutation CreateExercise($name: String!, $description: String!) {
     createExercise(input: {name: $name, description: $description}) {

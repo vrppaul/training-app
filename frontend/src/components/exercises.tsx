@@ -5,7 +5,9 @@ import {
   useQuery,
   useMutation,
 } from '@apollo/client';
-import { CREATE_EXERCISE, GET_EXERCISES, ExercisesData } from '../gql/exercises';
+import {
+  CREATE_EXERCISE, GET_EXERCISES, ExercisesData, GET_EXERCISE_FRAGMENT,
+} from '../gql/exercises';
 import Loading from './loading';
 
 interface ExerciseProps {
@@ -32,7 +34,13 @@ const ExistingExercises: FC = () => {
         Мои упражнения
       </h1>
       {loading ? <Loading /> : data?.exercises.map(
-        (exercise) => <Exercise name={exercise.name} description={exercise.description} />,
+        (exercise) => (
+          <Exercise
+            key={exercise._id}
+            name={exercise.name}
+            description={exercise.description}
+          />
+        ),
       )}
       {/* TODO: add sentry */}
       {/* TODO: add correct error handling with error.graphQLErrors and error.networkError */}
@@ -46,7 +54,21 @@ const NewExercise: FC<NewExerciseProps> = (
 ) => {
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
-  const [createExercise, { loading, error }] = useMutation(CREATE_EXERCISE);
+  const [createExercise, { loading, error }] = useMutation(CREATE_EXERCISE, {
+    update(cache, { data: { createExercise } }) {
+      cache.modify({
+        fields: {
+          exercises(existingExercises = []) {
+            const newExerciseRef = cache.writeFragment({
+              data: createExercise,
+              fragment: GET_EXERCISE_FRAGMENT,
+            });
+            return [...existingExercises, newExerciseRef];
+          },
+        },
+      });
+    },
+  });
 
   const setValue = (
     e: React.FormEvent<HTMLInputElement>,
@@ -63,7 +85,7 @@ const NewExercise: FC<NewExerciseProps> = (
     ).then(() => {
       setDisplayExisting(true);
     }).catch(
-      () => {},
+      (catchedError) => { console.log(catchedError); },
     );
   };
 

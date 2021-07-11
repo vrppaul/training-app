@@ -5,6 +5,8 @@ networks:
         external: true
     db-internal:
         external: false
+    tracing:
+        external: false
 
 services:
     reverse-proxy:
@@ -17,13 +19,24 @@ services:
             - "--providers.docker"
             - "--providers.docker.network=public"
             - "--entrypoints.web.address=:80"
+            - "--tracing=true"
+            - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
         networks:
             - public
+            - tracing
         ports:
             - "80:80"
             - "8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+
+    # TODO: add back when key features are ready
+    # jaeger:
+    #     image: jaegertracing/all-in-one:latest
+    #     networks:
+    #         - tracing
+    #     ports: 
+    #         - "16686:16686"
 
     frontend:
         build: 
